@@ -89,6 +89,10 @@ def rule_creation(X, Y, antecedents, consequents, existing_rules=[], existing_we
                 weights[index] = None
     rules = [rules[k] for k, rule in enumerate(rules) if rules[k] is not None]
     weights = [weights[k] for k, weight in enumerate(weights) if weights[k] is not None]
+    
+    # testing using certainty factors on whether to keep based on this metric
+    weights = [weights[k] for k, weight in enumerate(weights) if rules[k]['CF'] >= 0.2]
+    rules = [rules[k] for k, rule in enumerate(rules) if rules[k]['CF'] >= 0.2]
 
     # need to check that no antecedent/consequent terms are "orphaned"
     

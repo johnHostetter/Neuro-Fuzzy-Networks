@@ -148,7 +148,7 @@ class SaFIN:
         for l in set(self.consequents_indices_for_each_rule):
             relevant_rule_indices = np.where(self.consequents_indices_for_each_rule == l)[0]
             m = 0 # iterate over m's if this is to be redesigned to work on multi-dimensional output
-            e3[relevant_rule_indices] = np.sum(e4_m[l, m])
+            e3[relevant_rule_indices] = np.sum(e4_m[m, l])
         
         # (4) calculating the error signal in the condition layer
 
