@@ -18,8 +18,12 @@ def CLIP(X, Y, mins, maxes, terms=[], alpha=0.2, beta=0.6):
     antecedents = terms
     min_values_per_feature_in_X = mins
     max_values_per_feature_in_X = maxes
-    for training_tuple in zip(X, Y):
+    for idx, training_tuple in enumerate(zip(X, Y)):
         x = training_tuple[0]
+        # try:
+        #     x = X.iloc[idx]
+        # except AttributeError: # the X is a Numpy array
+        #     x = training_tuple[0]
         d = training_tuple[1]
         if not antecedents:
             # no fuzzy clusters yet, create the first fuzzy cluster
@@ -30,7 +34,7 @@ def CLIP(X, Y, mins, maxes, terms=[], alpha=0.2, beta=0.6):
                 left_width = np.sqrt(-1.0 * (np.power(min_p - x[p], 2) / np.log(alpha)))
                 right_width = np.sqrt(-1.0 * (np.power(max_p - x[p], 2) / np.log(alpha)))
                 sigma_1p = R(left_width, right_width)
-                antecedents.append([{'center': c_1p, 'sigma': sigma_1p}])
+                antecedents.append([{'center': c_1p, 'sigma': sigma_1p, 'support':1}])
         else:
             # calculate the similarity between the input and existing fuzzy clusters
             for p in range(len(x)):
@@ -42,12 +46,13 @@ def CLIP(X, Y, mins, maxes, terms=[], alpha=0.2, beta=0.6):
 
                 if np.max(SM_jps) > beta:
                     # the best matched cluster is deemed as being able to give satisfactory description of the presented value
-                    continue # implement later
+                    A_j_star_p = antecedents[p][j_star_p]
+                    A_j_star_p['support'] += 1
                 else:
                     # a new cluster is created in the input dimension based on the presented value
                     if np.isnan(np.max(SM_jps)):
                         print('wait')
-                    print(np.max(SM_jps))
+                    # print(np.max(SM_jps))
                     
                     jL_p = None
                     jR_p = None
@@ -108,7 +113,7 @@ def CLIP(X, Y, mins, maxes, terms=[], alpha=0.2, beta=0.6):
                         sigma_L = R(left_sigma_L, sigma_L_jp)
                         
                         new_sigma = R(sigma_R, sigma_L)
-                    antecedents[p].append({'center':new_c, 'sigma':new_sigma})
+                    antecedents[p].append({'center':new_c, 'sigma':new_sigma, 'support':1})
     return antecedents
 
 def rule_creation(X, Y, antecedents, consequents):
@@ -135,7 +140,7 @@ def rule_creation(X, Y, antecedents, consequents):
             for j, C_jq in enumerate(consequents[q]):
                 SM_jq = gaussian(d[q], C_jq['center'], C_jq['sigma'])
                 SM_jqs.append(SM_jq)
-            print(SM_jqs)
+            # print(SM_jqs)
             CF *= np.max(SM_jqs)
             j_star_q = np.argmax(SM_jqs)
             C_star_qs.append(j_star_q)
